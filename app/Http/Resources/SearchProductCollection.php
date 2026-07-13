@@ -44,7 +44,7 @@ class SearchProductCollection extends ResourceCollection
 
             $discount_price = $price - $discount;
 
-            $vat        = round($taxRate * $price, 2);
+            $vat        = round($taxRate * $discount_price, 2);
 
             $placeholder = static_asset('assets/img/placeholder.jpg');
 

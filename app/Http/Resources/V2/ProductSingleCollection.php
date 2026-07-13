@@ -40,7 +40,7 @@ class ProductSingleCollection extends ResourceCollection
                 $discount_price = $price - $discount;
 
                 $taxRate  = (optional($data->taxes->first())->tax ?? 0) / 100;
-                $vat      = round($taxRate * $price, 2);
+                $vat      = round($taxRate * $discount_price, 2);
                 $totalPrice = round($discount_price + $vat, 2);
 
                 return [

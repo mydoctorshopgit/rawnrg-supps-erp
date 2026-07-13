@@ -1925,12 +1925,12 @@ if (!function_exists('stock_price')) {
 
             $has_discount = home_base_price($product, false) != home_discounted_base_price($product, false);
 
-            $productVat = ($vat / 100) * $stock->price;
-
 
             $discount_price = ($product->discount_type === 'amount')
                 ? $stock->price - $product->discount
                 : $stock->price - (($stock->price * $product->discount) / 100);
+
+            $productVat = ($vat / 100) * $discount_price;
 
             $finalPrice = $discount_price + $productVat;
 

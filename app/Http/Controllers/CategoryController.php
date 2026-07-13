@@ -169,6 +169,7 @@ class CategoryController extends Controller
             'banner' => $request->banner,
             'icon' => $request->icon,
             'cover_image' => $request->cover_image,
+            'background_image' => $request->background_image,
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
             'commision_rate' => $request->commision_rate,
@@ -291,6 +292,7 @@ class CategoryController extends Controller
         $category->lite_color = $request->lite_color;
         $category->tagline = $request->tagline;
         $category->cover_image = $request->cover_image;
+        $category->background_image = $request->background_image;
 
 
         $category->banner_alt = !empty($request->banner_alt) ? json_encode($request->banner_alt) : [];

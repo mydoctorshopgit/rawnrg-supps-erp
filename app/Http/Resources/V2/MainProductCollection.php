@@ -158,7 +158,8 @@ class MainProductCollection extends ResourceCollection
 
                 // $vat = ((optional($data->taxes->first())->tax ?? 0) / 100) * $price;
                 $vat = ((optional($data->taxes->first())->tax ?? 0) / 100) * $discount_price;
-                $finalPrice = $selectedVariant['total_price'] ?? 0;
+                // $finalPrice = $selectedVariant['total_price'] ?? 0;
+                $finalPrice = $discount_price + $vat;
 
                 $placeholder = static_asset('assets/img/placeholder.jpg');
 
