@@ -221,6 +221,21 @@
                         </div>
                     </div>
                     <div class="form-group row">
+                        <label class="col-md-3 col-form-label" for="signinSrEmail">{{translate('Background Image')}}</label>
+                        <div class="col-md-9">
+                            <div class="input-group" data-toggle="aizuploader" data-type="image">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text bg-soft-secondary font-weight-medium">{{
+                                        translate('Browse')}}</div>
+                                </div>
+                                <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                <input type="hidden" name="background_image" value="{{ $category->background_image }}" class="selected-files" data-image-alt="background_image_alt" data-image-alt-type="multiple" data-alt-value="{{ !empty($category->background_image) ? $category->background_image : '[]' }}">
+                            </div>
+                            <div class="file-preview box sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label class="col-md-3 col-form-label">{{translate('Meta Title')}}</label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" name="meta_title"

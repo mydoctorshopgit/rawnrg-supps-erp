@@ -72,7 +72,7 @@ class CategoryCollection extends ResourceCollection
                 $verifiedSellers = verified_sellers_id();
                 $query->where(function ($q) use ($verifiedSellers) {
                     $q->where('products.added_by', 'admin')
-                      ->orWhereIn('products.user_id', $verifiedSellers);
+                        ->orWhereIn('products.user_id', $verifiedSellers);
                 });
             } else {
                 $query->where('products.added_by', 'admin');
@@ -112,18 +112,18 @@ class CategoryCollection extends ResourceCollection
             // ── Sorting ───────────────────────────────────────────────────────
             match ($sort) {
                 'price_asc'  => $query->orderBy(
-                                    ProductStock::select('price')
-                                        ->whereColumn('product_id', 'products.id')
-                                        ->orderBy('price')->limit(1)
-                                ),
+                    ProductStock::select('price')
+                        ->whereColumn('product_id', 'products.id')
+                        ->orderBy('price')->limit(1)
+                ),
                 'price_desc' => $query->orderByDesc(
-                                    ProductStock::select('price')
-                                        ->whereColumn('product_id', 'products.id')
-                                        ->orderByDesc('price')->limit(1)
-                                ),
+                    ProductStock::select('price')
+                        ->whereColumn('product_id', 'products.id')
+                        ->orderByDesc('price')->limit(1)
+                ),
                 'name_asc'   => $query->orderBy('products.name', 'asc'),
                 'bestseller' => $query->orderByDesc('products.best_seller')
-                                      ->orderByDesc('products.num_of_sale'),
+                    ->orderByDesc('products.num_of_sale'),
                 'rating'     => $query->orderByDesc('products.rating'),
                 default      => $query->orderByDesc('products.created_at'),
             };
@@ -140,7 +140,7 @@ class CategoryCollection extends ResourceCollection
                 'taxes',
                 'main_category:id,name,slug,color,lite_color',
                 'wishlists'     => fn($q) => $q->where('user_id', auth()->id() ?? 0)
-                                              ->select('product_id', 'user_id'),
+                    ->select('product_id', 'user_id'),
             ]);
 
             $paginatedProducts = $query->paginate($perPage)->withQueryString();
@@ -148,8 +148,8 @@ class CategoryCollection extends ResourceCollection
             // ── Brands in this result set ─────────────────────────────────────
             $brands = $paginatedProducts->isNotEmpty()
                 ? $paginatedProducts->pluck('brand_id')
-                    ->filter()->unique()
-                    ->pipe(fn($ids) => \App\Models\Brand::whereIn('id', $ids)->get(['id', 'name']))
+                ->filter()->unique()
+                ->pipe(fn($ids) => \App\Models\Brand::whereIn('id', $ids)->get(['id', 'name']))
                 : collect();
         }
 
@@ -165,8 +165,9 @@ class CategoryCollection extends ResourceCollection
                     'lite_color'         => $data->lite_color ?? '',
                     'tagline'            => $data->tagline ?? '',
                     'short_description'  => $data->short_description ?? '',
-                    'banner'             => uploaded_asset($data->banner) ?? '',
+                    'banner'             => $data->banner ? uploaded_asset($data->banner) : '',
                     'icon'               => uploaded_asset($data->icon) ?? '',
+                    'background_image'   => $data->background_image ? uploaded_asset($data->background_image) : '',
                     'meta_title'         => $data->meta_title,
                     'meta_description'   => $data->meta_description,
                     'cover_image'        => uploaded_asset($data->cover_image) ?? '',
@@ -210,10 +211,10 @@ class CategoryCollection extends ResourceCollection
                 'our_range'           => $this->parentCategory->our_range ?? null,
                 'why_us'              => $this->parentCategory->why_us ?? null,
                 'faqs'                => $this->parentCategory->faqs
-                                            ? (is_string($this->parentCategory->faqs)
-                                                ? json_decode($this->parentCategory->faqs, true)
-                                                : $this->parentCategory->faqs)
-                                            : null,
+                    ? (is_string($this->parentCategory->faqs)
+                        ? json_decode($this->parentCategory->faqs, true)
+                        : $this->parentCategory->faqs)
+                    : null,
                 'title'               => $this->parentCategory->title,
                 'content_description' => $this->parentCategory->content_description ?? null,
                 'meta_title'          => $this->parentCategory->meta_title,
@@ -221,9 +222,10 @@ class CategoryCollection extends ResourceCollection
                 'description'         => $this->parentCategory->description,
                 'slug'                => $this->parentCategory->slug,
                 'parent_id'           => $this->parentCategory->parent_id,
-                'banner'              => uploaded_asset($this->parentCategory->banner),
+                'banner'              => $this->parentCategory->banner ? uploaded_asset($this->parentCategory->banner) : '',
                 'icon'                => uploaded_asset($this->parentCategory->icon),
                 'cover_image'         => uploaded_asset($this->parentCategory->cover_image),
+                'background_image'   => $this->parentCategory->background_image ? uploaded_asset($this->parentCategory->background_image) : '',
             ] : null,
 
             'featured_categories' => $this->featuredCategories
@@ -235,6 +237,7 @@ class CategoryCollection extends ResourceCollection
                         'banner'             => uploaded_asset($data->banner) ?? '',
                         'icon'               => uploaded_asset($data->icon) ?? '',
                         'cover_image'        => uploaded_asset($data->cover_image) ?? '',
+                        'background_image'   => $data->background_image ? uploaded_asset($data->background_image) : '',
                         'number_of_children' => CategoryUtility::get_immediate_children_count($data->id),
                     ];
                 })

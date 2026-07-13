@@ -8,7 +8,7 @@ use App;
 class Category extends Model
 {
     // protected $with = ['category_translations'];
-    protected $fillable = ['parent_id', 'name', 'content_description', 'short_description', 'overview', 'our_range', 'why_us', 'faqs', 'color', 'lite_color', 'tagline', 'order_level', 'digital', 'banner', 'icon', 'cover_image', 'meta_title', 'meta_description', 'save_big'];
+    protected $fillable = ['parent_id', 'name', 'content_description', 'short_description', 'overview', 'our_range', 'why_us', 'faqs', 'color', 'lite_color', 'tagline', 'order_level', 'digital', 'banner', 'icon', 'cover_image', 'background_image', 'meta_title', 'meta_description', 'save_big'];
     protected $casts = ['faqs' => 'array'];
 
     public function getTranslation($field = '', $lang = false)
