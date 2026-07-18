@@ -42,9 +42,9 @@ class HomePageController extends Controller
                                     ])
                                     ->latest()->limit(15)->get();
 
-        $monthly_deal_products = Product::where('monthly_deal', 1)
-                                    ->with(['stocks' => fn($q) => $q->orderBy('price'), 'taxes'])
-                                    ->latest()->limit(10)->get();
+        // $monthly_deal_products = Product::where('monthly_deal', 1)
+        //                             ->with(['stocks' => fn($q) => $q->orderBy('price'), 'taxes'])
+        //                             ->latest()->limit(10)->get();
 
         $save_big_categories   = Category::where('save_big', 1)
                                     ->with(['parent.parent']) // load up to 2 levels up for full_slug
@@ -78,7 +78,7 @@ class HomePageController extends Controller
                     'blogs'                 => $blogs,
                     'reviews'               => $reviews,
                     'trending_products'     => new ProductSingleCollection($trending_products),
-                    'monthly_deal_products' => new ProductSingleCollection($monthly_deal_products),
+                    // 'monthly_deal_products' => new ProductSingleCollection($monthly_deal_products),
                     'save_big_categories'   => $save_big_categories, // already mapped with full_slug
                     'banners'               => $bannersData,
                 ]
@@ -167,13 +167,13 @@ class HomePageController extends Controller
                          'cover_image', 'meta_title', 'meta_description', 'banner_alt', 'icon_alt', 'cover_image_alt')
                 ->get();
 
-            $featured = Category::active()
-                ->where('featured', 1)
-                ->select('id', 'name', 'slug', 'cover_image', 'meta_title', 'meta_description', 'banner', 'icon',
-                         'color', 'lite_color', 'tagline', 'banner_alt', 'icon_alt', 'cover_image_alt')
-                ->with('coverImage')
-                ->limit(8)
-                ->get();
+            // $featured = Category::active()
+            //     ->where('featured', 1)
+            //     ->select('id', 'name', 'slug', 'cover_image', 'meta_title', 'meta_description', 'banner', 'icon',
+            //              'color', 'lite_color', 'tagline', 'banner_alt', 'icon_alt', 'cover_image_alt')
+            //     ->with('coverImage')
+            //     ->limit(8)
+            //     ->get();
 
             $bestSellerCategories = Category::active()
                 ->where('best_seller', 1)
@@ -185,7 +185,7 @@ class HomePageController extends Controller
             // Return a plain array — never a Response object inside cache
             return [
                 'menu_categories'        => CategoryResource::collection($menu),
-                'featured_categories'    => CategoryResource::collection($featured),
+                // 'featured_categories'    => CategoryResource::collection($featured),
                 'best_seller_categories' => BestSellerCategoryCollection::collection($bestSellerCategories),
             ];
         });
@@ -197,7 +197,7 @@ class HomePageController extends Controller
     public function getBannersData(): array
     {
         $grouped = Cache::remember('all_banners', 300, function () {
-            return Bannars::whereIn('status', [1, 2, 3, 4])
+            return Bannars::whereIn('status', [1])
                 ->latest()
                 ->get()
                 ->groupBy('status');
@@ -210,9 +210,9 @@ class HomePageController extends Controller
 
         return [
             'hero_banners'        => $format($grouped[1] ?? collect(), 'asc'),
-            'best_seller_banners' => $format($grouped[2] ?? collect()),
-            'monthly_banner'      => $format($grouped[3] ?? collect()),
-            'support_banners'     => $format($grouped[4] ?? collect()),
+            // 'best_seller_banners' => $format($grouped[2] ?? collect()),
+            // 'monthly_banner'      => $format($grouped[3] ?? collect()),
+            // 'support_banners'     => $format($grouped[4] ?? collect()),
         ];
     }
 
