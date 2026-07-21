@@ -12,6 +12,7 @@ class Bannars extends Model
         'title',
         'description',
         'image',
+        'backgound_image',
         'status',
         'banner_type',
         'sku',

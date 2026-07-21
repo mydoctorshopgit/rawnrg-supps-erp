@@ -16,9 +16,9 @@
     </div>
 </div>
 
-{{-- Background Image (always shown) --}}
+{{-- Image (always shown) --}}
 <div class="form-group row">
-    <label class="col-md-3 col-form-label">Background Image</label>
+    <label class="col-md-3 col-form-label">Image</label>
     <div class="col-md-9">
         <div class="input-group" data-toggle="aizuploader" data-type="image">
             <div class="input-group-prepend">
@@ -28,6 +28,22 @@
             <input type="hidden" name="image" value="{{ $bannars->image ?? '' }}" class="selected-files">
         </div>
         <div class="file-preview box sm"></div>
+    </div>
+</div>
+
+{{-- Background Image (always shown) --}}
+<div class="form-group row">
+    <label class="col-md-3 col-form-label">Background Image</label>
+    <div class="col-md-9">
+        <div class="input-group" data-toggle="aizuploader" data-type="image">
+            <div class="input-group-prepend">
+                <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+            </div>
+            <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+            <input type="hidden" name="background_image" value="{{ $bannars->background_image ?? '' }}" class="selected-files">
+        </div>
+        <div class="file-preview box sm">
+        </div>
     </div>
 </div>
 

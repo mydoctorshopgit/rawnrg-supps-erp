@@ -240,6 +240,7 @@ class BannerController extends Controller
         $type = $request->input('banner_type', 'simple');
         $bannars->banner_type = $type;
         $bannars->image       = $request->image;
+        $bannars->background_image = $request->background_image;
         $bannars->url         = $request->input('url');
 
         if ($type === 'product') {
