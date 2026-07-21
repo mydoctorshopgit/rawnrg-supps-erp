@@ -35,39 +35,44 @@ class HomePageController extends Controller
         $bannersData           = $this->getBannersData();  // plain array
 
         $trending_products     = Product::where('is_trending', 1)
-                                    ->with([
-                                        'stocks'        => fn($q) => $q->orderBy('price'),
-                                        'taxes',
-                                        'main_category:id,color,lite_color',
-                                    ])
-                                    ->latest()->limit(15)->get();
+            ->with([
+                'stocks'        => fn($q) => $q->orderBy('price'),
+                'taxes',
+                'main_category:id,color,lite_color',
+            ])
+            ->latest()->limit(15)->get();
+
+        $best_seller_products = Product::where('best_seller', 1)
+            ->latest()
+            ->limit(15)
+            ->get();
 
         // $monthly_deal_products = Product::where('monthly_deal', 1)
         //                             ->with(['stocks' => fn($q) => $q->orderBy('price'), 'taxes'])
         //                             ->latest()->limit(10)->get();
 
-        $save_big_categories   = Category::where('save_big', 1)
-                                    ->with(['parent.parent']) // load up to 2 levels up for full_slug
-                                    ->select('id', 'name', 'slug', 'parent_id', 'banner', 'icon', 'cover_image', 'color',
-                                             'lite_color', 'tagline', 'meta_title', 'meta_description',
-                                             'banner_alt', 'icon_alt', 'cover_image_alt')
-                                    ->latest()->limit(3)->get()
-                                    ->map(fn(Category $cat) => [
-                                        'id'               => $cat->id,
-                                        'name'             => $cat->name,
-                                        'slug'             => $cat->full_slug, // parent/child/subchild
-                                        'banner'           => uploaded_asset($cat->banner),
-                                        'icon'             => uploaded_asset($cat->icon),
-                                        'cover_image'      => uploaded_asset($cat->cover_image),
-                                        'color'            => $cat->color ?? '',
-                                        'lite_color'       => $cat->lite_color ?? '',
-                                        'tagline'          => $cat->tagline ?? '',
-                                        'meta_title'       => $cat->meta_title,
-                                        'meta_description' => $cat->meta_description,
-                                        'banner_alt'       => $cat->banner_alt,
-                                        'icon_alt'         => $cat->icon_alt,
-                                        'cover_image_alt'  => $cat->cover_image_alt,
-                                    ]);
+        // $save_big_categories   = Category::where('save_big', 1)
+        //                             ->with(['parent.parent']) // load up to 2 levels up for full_slug
+        //                             ->select('id', 'name', 'slug', 'parent_id', 'banner', 'icon', 'cover_image', 'color',
+        //                                      'lite_color', 'tagline', 'meta_title', 'meta_description',
+        //                                      'banner_alt', 'icon_alt', 'cover_image_alt')
+        //                             ->latest()->limit(3)->get()
+        //                             ->map(fn(Category $cat) => [
+        //                                 'id'               => $cat->id,
+        //                                 'name'             => $cat->name,
+        //                                 'slug'             => $cat->full_slug, // parent/child/subchild
+        //                                 'banner'           => uploaded_asset($cat->banner),
+        //                                 'icon'             => uploaded_asset($cat->icon),
+        //                                 'cover_image'      => uploaded_asset($cat->cover_image),
+        //                                 'color'            => $cat->color ?? '',
+        //                                 'lite_color'       => $cat->lite_color ?? '',
+        //                                 'tagline'          => $cat->tagline ?? '',
+        //                                 'meta_title'       => $cat->meta_title,
+        //                                 'meta_description' => $cat->meta_description,
+        //                                 'banner_alt'       => $cat->banner_alt,
+        //                                 'icon_alt'         => $cat->icon_alt,
+        //                                 'cover_image_alt'  => $cat->cover_image_alt,
+        //                             ]);
 
         return response()->json([
             'success' => true,
@@ -79,8 +84,9 @@ class HomePageController extends Controller
                     'reviews'               => $reviews,
                     'trending_products'     => new ProductSingleCollection($trending_products),
                     // 'monthly_deal_products' => new ProductSingleCollection($monthly_deal_products),
-                    'save_big_categories'   => $save_big_categories, // already mapped with full_slug
+                    // 'save_big_categories'   => $save_big_categories, // already mapped with full_slug
                     'banners'               => $bannersData,
+                    'best_seller_products' => new ProductSingleCollection($best_seller_products),
                 ]
             ),
         ]);
@@ -163,8 +169,23 @@ class HomePageController extends Controller
                     'children.children:id,name,slug,parent_id,color,lite_color,tagline',
                     'children.children.children:id,name,slug,parent_id,color,lite_color,tagline',
                 ])
-                ->select('id', 'name', 'slug', 'parent_id', 'banner', 'icon', 'color', 'lite_color', 'tagline',
-                         'cover_image', 'meta_title', 'meta_description', 'banner_alt', 'icon_alt', 'cover_image_alt')
+                ->select(
+                    'id',
+                    'name',
+                    'slug',
+                    'parent_id',
+                    'banner',
+                    'icon',
+                    'color',
+                    'lite_color',
+                    'tagline',
+                    'cover_image',
+                    'meta_title',
+                    'meta_description',
+                    'banner_alt',
+                    'icon_alt',
+                    'cover_image_alt'
+                )
                 ->get();
 
             // $featured = Category::active()
@@ -175,18 +196,18 @@ class HomePageController extends Controller
             //     ->limit(8)
             //     ->get();
 
-            $bestSellerCategories = Category::active()
-                ->where('best_seller', 1)
-                ->with(['bestSellerProducts'])
-                ->select('id', 'name', 'slug', 'banner', 'icon', 'cover_image', 'color', 'lite_color', 'tagline')
-                ->limit(10)
-                ->get();
+            // $bestSellerCategories = Category::active()
+            //     ->where('best_seller', 1)
+            //     ->with(['bestSellerProducts'])
+            //     ->select('id', 'name', 'slug', 'banner', 'icon', 'cover_image', 'color', 'lite_color', 'tagline')
+            //     ->limit(10)
+            //     ->get();
 
             // Return a plain array — never a Response object inside cache
             return [
                 'menu_categories'        => CategoryResource::collection($menu),
                 // 'featured_categories'    => CategoryResource::collection($featured),
-                'best_seller_categories' => BestSellerCategoryCollection::collection($bestSellerCategories),
+                // 'best_seller_categories' => BestSellerCategoryCollection::collection($bestSellerCategories),
             ];
         });
     }
@@ -237,6 +258,7 @@ class HomePageController extends Controller
             'id'          => $b->id,
             'banner_type' => $b->banner_type ?? 'simple',
             'image'       => uploaded_asset($b->image),
+            'background_image' => uploaded_asset($b->background_image),
             'url'         => $b->url,
             'created_at'  => $b->created_at?->toDateTimeString(),
         ];
