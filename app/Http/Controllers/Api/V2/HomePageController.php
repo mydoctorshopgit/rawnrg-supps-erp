@@ -28,15 +28,15 @@ class HomePageController extends Controller
     {
         Log::info(auth()->user());
 
-        $partnersList          = $this->partnersList($request);
-        $blogs                 = $this->blogs();
-        $reviews               = $this->clientReviews();
-        $categories            = $this->categories_data(); // plain array
-        $bannersData           = $this->getBannersData();  // plain array
+        $partnersList = $this->partnersList($request);
+        $blogs = $this->blogs();
+        $reviews = $this->clientReviews();
+        $categories = $this->categories_data(); // plain array
+        $bannersData = $this->getBannersData();  // plain array
 
-        $trending_products     = Product::where('is_trending', 1)
+        $trending_products = Product::where('is_trending', 1)
             ->with([
-                'stocks'        => fn($q) => $q->orderBy('price'),
+                'stocks' => fn($q) => $q->orderBy('price'),
                 'taxes',
                 'main_category:id,color,lite_color',
             ])
@@ -44,51 +44,88 @@ class HomePageController extends Controller
 
         $best_seller_products = Product::where('best_seller', 1)
             ->latest()
-            ->limit(15)
+            ->limit(9)
             ->get();
 
         // $monthly_deal_products = Product::where('monthly_deal', 1)
         //                             ->with(['stocks' => fn($q) => $q->orderBy('price'), 'taxes'])
         //                             ->latest()->limit(10)->get();
 
-        // $save_big_categories   = Category::where('save_big', 1)
-        //                             ->with(['parent.parent']) // load up to 2 levels up for full_slug
-        //                             ->select('id', 'name', 'slug', 'parent_id', 'banner', 'icon', 'cover_image', 'color',
-        //                                      'lite_color', 'tagline', 'meta_title', 'meta_description',
-        //                                      'banner_alt', 'icon_alt', 'cover_image_alt')
-        //                             ->latest()->limit(3)->get()
-        //                             ->map(fn(Category $cat) => [
-        //                                 'id'               => $cat->id,
-        //                                 'name'             => $cat->name,
-        //                                 'slug'             => $cat->full_slug, // parent/child/subchild
-        //                                 'banner'           => uploaded_asset($cat->banner),
-        //                                 'icon'             => uploaded_asset($cat->icon),
-        //                                 'cover_image'      => uploaded_asset($cat->cover_image),
-        //                                 'color'            => $cat->color ?? '',
-        //                                 'lite_color'       => $cat->lite_color ?? '',
-        //                                 'tagline'          => $cat->tagline ?? '',
-        //                                 'meta_title'       => $cat->meta_title,
-        //                                 'meta_description' => $cat->meta_description,
-        //                                 'banner_alt'       => $cat->banner_alt,
-        //                                 'icon_alt'         => $cat->icon_alt,
-        //                                 'cover_image_alt'  => $cat->cover_image_alt,
-        //                             ]);
+        $save_big_categories = Category::where('save_big', 1)
+            ->with(['parent.parent']) // load up to 2 levels up for full_slug
+            ->select([
+                'id',
+                'name',
+                'slug',
+                'parent_id',
+                'banner',
+                'icon',
+                'cover_image',
+                'color',
+                'lite_color',
+                'tagline',
+                'meta_title',
+                'meta_description',
+                'banner_alt',
+                'icon_alt',
+                'cover_image_alt'
+            ])
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(fn(Category $cat) => [
+                'id'               => $cat->id,
+                'name'             => $cat->name,
+                'slug'             => $cat->full_slug, // parent/child/subchild
+                'banner'           => uploaded_asset($cat->banner),
+                'icon'             => uploaded_asset($cat->icon),
+                'cover_image'      => uploaded_asset($cat->cover_image),
+                'color'            => $cat->color ?? '',
+                'lite_color'       => $cat->lite_color ?? '',
+                'tagline'          => $cat->tagline ?? '',
+                'meta_title'       => $cat->meta_title,
+                'meta_description' => $cat->meta_description,
+                'banner_alt'       => $cat->banner_alt,
+                'icon_alt'         => $cat->icon_alt,
+                'cover_image_alt'  => $cat->cover_image_alt,
+            ]);
+
+        $top_pick_products = Product::with(['stocks', 'taxes'])
+            ->where('save_big', 1)
+            ->select([
+                'id',
+                'name',
+                'thumbnail_img',
+                'slug',
+                'unit_price',
+                'discount_start_date',
+                'discount_end_date',
+                'discount_type',
+                'discount',
+                'rating',
+                'product_code',
+                'pip_code',
+                'todays_deal',
+                'featured',
+                'monthly_deal',
+            ])
+            ->latest()
+            ->limit(9)
+            ->get();
 
         return response()->json([
             'success' => true,
-            'data'    => array_merge(
-                $categories, // menu_categories, featured_categories, best_seller_categories
-                [
-                    'partners'              => $partnersList,
-                    'blogs'                 => $blogs,
-                    'reviews'               => $reviews,
-                    'trending_products'     => new ProductSingleCollection($trending_products),
-                    // 'monthly_deal_products' => new ProductSingleCollection($monthly_deal_products),
-                    // 'save_big_categories'   => $save_big_categories, // already mapped with full_slug
-                    'banners'               => $bannersData,
-                    'best_seller_products' => new ProductSingleCollection($best_seller_products),
-                ]
-            ),
+            'data'    => array_merge($categories, [
+                'partners'              => $partnersList,
+                'blogs'                 => $blogs,
+                'reviews'               => $reviews,
+                'trending_products'     => new ProductSingleCollection($trending_products),
+                // 'monthly_deal_products' => new ProductSingleCollection($monthly_deal_products),
+                'top_picks_categories'   => $save_big_categories, // already mapped with full_slug
+                'top_pick_products' => new ProductSingleCollection($top_pick_products),
+                'banners'               => $bannersData,
+                'best_seller_products' => new ProductSingleCollection($best_seller_products),
+            ]),
         ]);
     }
 
@@ -96,7 +133,15 @@ class HomePageController extends Controller
     {
         // Cache the full sorted collection — never cache a paginator (it freezes page 1)
         $allBrands = Cache::remember('all_brands_list', now()->addMinutes(30), function () {
-            return Brand::orderBy('featured', 'desc')   // featured brands first
+            return Brand::without('brand_translations')
+                ->select([
+                    'id',
+                    'name',
+                    'logo',
+                    'featured',
+                    'order_level'
+                ])
+                ->orderBy('featured', 'desc')   // featured brands first
                 ->orderBy('order_level', 'asc')         // then by admin-set order
                 ->orderBy('name', 'asc')                // then alphabetically
                 ->get();
