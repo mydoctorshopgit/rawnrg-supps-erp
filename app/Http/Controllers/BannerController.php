@@ -263,4 +263,98 @@ class BannerController extends Controller
             $bannars->button_text   = null;
         }
     }
+
+    public function BestSellerIndex()
+    {
+        $bannars = Bannars::where('status', 5)->get();
+        return view('backend.bannars.bestSellerBanner.index', compact('bannars'));
+    }
+
+    public function BestSellerCreate()
+    {
+        return view('backend.bannars.bestSellerBanner.create');
+    }
+
+    public function BestSellerStore(Request $request)
+    {
+        $bannars = new Bannars();
+        $this->fillBanner($bannars, $request);
+        $bannars->status = 5;
+        $bannars->save();
+        Cache::forget('all_banners');
+        return redirect()->route('BestSellerBannar.index');
+    }
+
+    public function BestSellerEdit($id)
+    {
+        $bannars = Bannars::findOrFail($id);
+        return view('backend.bannars.bestSellerBanner.edit', compact('bannars'));
+    }
+
+    public function BestSellerUpdate(Request $request)
+    {
+        $bannars = Bannars::findOrFail($request->id);
+        $this->fillBanner($bannars, $request);
+        $bannars->save();
+        Cache::forget('all_banners');
+        return redirect()->route('BestSellerBannar.index');
+    }
+
+    public function BestSellerDelete($id)
+    {
+        $bannars = Bannars::find($id);
+        if (!$bannars) {
+            return redirect()->route('BestSellerBannar.index');
+        }
+        $bannars->delete();
+        Cache::forget('all_banners');
+        return redirect()->route('BestSellerBannar.index');
+    }
+
+    public function trendingIndex()
+    {
+        $bannars = Bannars::where('status', 6)->get();
+        return view('backend.bannars.trendingBanner.index', compact('bannars'));
+    }
+
+    public function trendingCreate()
+    {
+        return view('backend.bannars.trendingBanner.create');
+    }
+
+    public function trendingStore(Request $request)
+    {
+        $bannars = new Bannars();
+        $this->fillBanner($bannars, $request);
+        $bannars->status = 6;
+        $bannars->save();
+        Cache::forget('all_banners');
+        return redirect()->route('trendingBannar.index');
+    }
+
+    public function trendingEdit($id)
+    {
+        $bannars = Bannars::findOrFail($id);
+        return view('backend.bannars.trendingBanner.edit', compact('bannars'));
+    }
+
+    public function trendingUpdate(Request $request)
+    {
+        $bannars = Bannars::findOrFail($request->id);
+        $this->fillBanner($bannars, $request);
+        $bannars->save();
+        Cache::forget('all_banners');
+        return redirect()->route('trendingBannar.index');
+    }
+
+    public function trendingDelete($id)
+    {
+        $bannars = Bannars::find($id);
+        if (!$bannars) {
+            return redirect()->route('trendingBannar.index');
+        }
+        $bannars->delete();
+        Cache::forget('all_banners');
+        return redirect()->route('trendingBannar.index');
+    }
 }

@@ -62,6 +62,7 @@ use App\Http\Controllers\SellerWithdrawRequestController;
 use App\Http\Controllers\pharmaceuticalCustomerController;
 use App\Http\Controllers\InternationalAccountController;
 use App\Models\Banner;
+use App\Models\Order;
 
 /*
   |--------------------------------------------------------------------------
@@ -133,6 +134,24 @@ Route::post('categories/get-children', [CategoryController::class, 'getChildren'
         Route::post('/bannar/last/update', 'lastUpdate')->name('lastBannar.update');
         Route::get('/bannar/last/delete/{id}', 'lastDelete')->name('lastBannar.delete');
         Route::post('/banner/last/status', 'status')->name('lastStatus.update');
+
+        // Best seller bannar
+        Route::get('/bannar/best-seller/index', 'BestSellerIndex')->name('BestSellerBannar.index');
+        Route::get('/bannar/best-seller/create', 'BestSellerCreate')->name('BestSellerBannar.create');
+        Route::post('/bannar/best-seller/store', 'BestSellerStore')->name('BestSellerBannar.store');
+        Route::get('/bannar/best-seller/edit/{id}', 'BestSellerEdit')->name('BestSellerBannar.edit');
+        Route::post('/bannar/best-seller/update', 'BestSellerUpdate')->name('BestSellerBannar.update');
+        Route::get('/bannar/best-seller/delete/{id}', 'BestSellerDelete')->name('BestSellerBannar.delete');
+        Route::post('/banner/best-seller/status', 'status')->name('BestSellerStatus.update');
+
+        // Trending bannar
+        Route::get('/bannar/trending/index', 'trendingIndex')->name('trendingBannar.index');
+        Route::get('/bannar/trending/create', 'trendingCreate')->name('trendingBannar.create');
+        Route::post('/bannar/trending/store', 'trendingStore')->name('trendingBannar.store');
+        Route::get('/bannar/trending/edit/{id}', 'trendingEdit')->name('trendingBannar.edit');
+        Route::post('/bannar/trending/update', 'trendingUpdate')->name('trendingBannar.update');
+        Route::get('/bannar/trending/delete/{id}', 'trendingDelete')->name('trendingBannar.delete');
+        Route::post('/banner/trending/status', 'status')->name('trendingStatus.update');
     });
     // Bannars
 
@@ -775,4 +794,10 @@ Route::post('categories/get-children', [CategoryController::class, 'getChildren'
     Route::get('/clear-cache', [AdminController::class, 'clearCache'])->name('cache.clear');
 
     Route::get('/admin-permissions', [RoleController::class, 'create_admin_permissions']);
+    Route::get('/email-template', function() {
+        $data['order'] = Order::first();
+        return view('emails.order_process_mail', $data);
+        // return view('emails.order_dispatched', $data);
+        // return view('emails.order_confirmation',$data);
+    });
 });

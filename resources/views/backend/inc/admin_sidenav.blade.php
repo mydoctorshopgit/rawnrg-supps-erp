@@ -393,7 +393,21 @@
                                     </a>
                                 </li>
                             @endcan
-                            @can('monthlyBannar.index')
+                            @can('BestSellerBannar.index')
+                                <li class="aiz-side-nav-item">
+                                    <a class="aiz-side-nav-link" href="{{ route('BestSellerBannar.index') }}">
+                                        <span class="aiz-side-nav-text">Best Seller Bannars</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('trendingBannar.index')
+                                <li class="aiz-side-nav-item">
+                                    <a class="aiz-side-nav-link" href="{{ route('trendingBannar.index') }}">
+                                        <span class="aiz-side-nav-text">Trending Bannars</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            {{-- @can('monthlyBannar.index')
                                 <li class="aiz-side-nav-item">
                                     <a class="aiz-side-nav-link" href="{{route('monthlyBannar.index')}}">
                                         <span class="aiz-side-nav-text">Monthly Bannars</span>
@@ -406,7 +420,7 @@
                                         <span class="aiz-side-nav-text">Last Bannars</span>
                                     </a>
                                 </li>
-                            @endcan
+                            @endcan --}}
                             <!-- @can('show_all_products')
                                 <li class="aiz-side-nav-item">
                                     <a href="{{route('products.all')}}" class="aiz-side-nav-link">

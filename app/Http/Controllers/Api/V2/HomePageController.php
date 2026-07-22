@@ -218,7 +218,7 @@ class HomePageController extends Controller
     public function getBannersData(): array
     {
         $grouped = Cache::remember('all_banners', 300, function () {
-            return Bannars::whereIn('status', [1])
+            return Bannars::whereIn('status', [1, 2, 5, 6])
                 ->latest()
                 ->get()
                 ->groupBy('status');
@@ -230,8 +230,10 @@ class HomePageController extends Controller
             ->values();
 
         return [
-            'hero_banners'        => $format($grouped[1] ?? collect(), 'asc'),
-            // 'best_seller_banners' => $format($grouped[2] ?? collect()),
+            'hero_banners' => $format($grouped[1] ?? collect(), 'asc'),
+            'middle_banners' => $format($grouped[2] ?? collect()),
+            'best_seller_banners' => $format($grouped[5] ?? collect()),
+            'trending_banners' => $format($grouped[6] ?? collect()),
             // 'monthly_banner'      => $format($grouped[3] ?? collect()),
             // 'support_banners'     => $format($grouped[4] ?? collect()),
         ];
