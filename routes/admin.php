@@ -88,8 +88,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 
     // category
     Route::resource('categories', CategoryController::class);
-Route::post('categories/get-children', [CategoryController::class, 'getChildren'])
-         ->name('categories.get-children');
+    Route::post('categories/get-children', [CategoryController::class, 'getChildren'])
+        ->name('categories.get-children');
     Route::controller(CategoryController::class)->group(function () {
         Route::get('/categories/edit/{id}', 'edit')->name('categories.edit');
         Route::get('/categories/destroy/{id}', 'destroy')->name('categories.destroy');
@@ -97,6 +97,7 @@ Route::post('categories/get-children', [CategoryController::class, 'getChildren'
         Route::post('/categories/status-update', 'updateStatus')->name('categories.status');
         Route::post('/categories/seller-update', 'sellerStatus')->name('seller.status');
         Route::post('/categories/save-big', 'updateSaveBig')->name('categories.save_big');
+        Route::post('/categories/top-pick', 'updateTopPick')->name('categories.top_pick');
         Route::post('/categories/categoriesByType', 'categoriesByType')->name('categories.categories-by-type');
         Route::post('/upload-editor-file', 'uploadImage')->name('admin.editor.upload');
     });
@@ -152,6 +153,15 @@ Route::post('categories/get-children', [CategoryController::class, 'getChildren'
         Route::post('/bannar/trending/update', 'trendingUpdate')->name('trendingBannar.update');
         Route::get('/bannar/trending/delete/{id}', 'trendingDelete')->name('trendingBannar.delete');
         Route::post('/banner/trending/status', 'status')->name('trendingStatus.update');
+
+        // Top pick bannar
+        Route::get('/bannar/top-pick/index', 'topPickIndex')->name('topPickBannar.index');
+        Route::get('/bannar/top-pick/create', 'topPickCreate')->name('topPickBannar.create');
+        Route::post('/bannar/top-pick/store', 'topPickStore')->name('topPickBannar.store');
+        Route::get('/bannar/top-pick/edit/{id}', 'topPickEdit')->name('topPickBannar.edit');
+        Route::post('/bannar/top-pick/update', 'topPickUpdate')->name('topPickBannar.update');
+        Route::get('/bannar/top-pick/delete/{id}', 'topPickDelete')->name('topPickBannar.delete');
+        Route::post('/banner/top-pick/status', 'status')->name('topPickStatus.update');
     });
     // Bannars
 
@@ -361,6 +371,7 @@ Route::post('categories/get-children', [CategoryController::class, 'getChildren'
         Route::post('/products/update_trending', 'updateTrending')->name('products.update_trending');
         Route::post('/products/update_monthly_deals', 'update_monthly_deals')->name('products.update_monthly_deals');
         Route::post('/products/update_save_big', 'updateSaveBig')->name('products.update_save_big');
+        Route::post('/products/update_top_pick', 'updateTopPick')->name('products.update_top_pick');
         Route::post('/products/pharma', 'updatePharma')->name('products.pharma');
         Route::post('/products/published', 'updatePublished')->name('products.published');
         Route::post('/products/approved', 'updateProductApproval')->name('products.approved');
@@ -794,7 +805,7 @@ Route::post('categories/get-children', [CategoryController::class, 'getChildren'
     Route::get('/clear-cache', [AdminController::class, 'clearCache'])->name('cache.clear');
 
     Route::get('/admin-permissions', [RoleController::class, 'create_admin_permissions']);
-    Route::get('/email-template', function() {
+    Route::get('/email-template', function () {
         $data['order'] = Order::first();
         return view('emails.order_process_mail', $data);
         // return view('emails.order_dispatched', $data);

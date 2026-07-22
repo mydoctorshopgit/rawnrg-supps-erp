@@ -357,4 +357,51 @@ class BannerController extends Controller
         Cache::forget('all_banners');
         return redirect()->route('trendingBannar.index');
     }
+
+    public function topPickIndex()
+    {
+        $bannars = Bannars::where('status', 7)->get();
+        return view('backend.bannars.topPickBannar.index', compact('bannars'));
+    }
+
+    public function topPickCreate()
+    {
+        return view('backend.bannars.topPickBannar.create');
+    }
+
+    public function topPickStore(Request $request)
+    {
+        $bannars = new Bannars();
+        $this->fillBanner($bannars, $request);
+        $bannars->status = 7;
+        $bannars->save();
+        Cache::forget('all_banners');
+        return redirect()->route('topPickBannar.index');
+    }
+
+    public function topPickEdit($id)
+    {
+        $bannars = Bannars::findOrFail($id);
+        return view('backend.bannars.topPickBannar.edit', compact('bannars'));
+    }
+
+    public function topPickUpdate(Request $request)
+    {
+        $bannars = Bannars::findOrFail($request->id);
+        $this->fillBanner($bannars, $request);
+        $bannars->save();
+        Cache::forget('all_banners');
+        return redirect()->route('topPickBannar.index');
+    }
+
+    public function topPickDelete($id)
+    {
+        $bannars = Bannars::find($id);
+        if (!$bannars) {
+            return redirect()->route('topPickBannar.index');
+        }
+        $bannars->delete();
+        Cache::forget('all_banners');
+        return redirect()->route('topPickBannar.index');
+    }
 }

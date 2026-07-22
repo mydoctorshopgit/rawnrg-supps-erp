@@ -9,18 +9,14 @@ class BlogCollection extends ResourceCollection
     public function toArray($request)
     {
         return [
-            'success' => true,
             'data' => $this->collection->map(function ($blog) {
-                $cat = $blog->category; // already resolved via belongsTo — do NOT re-query
-
                 return [
                     'id'                => $blog->id,
-                    'category'          => $cat ? [
-                                            'id'            => $cat->id,
-                                            'category_name' => $cat->category_name,
-                                            'slug'          => $cat->slug,
-                                            'created_at'    => optional($cat->created_at)->toDateTimeString(),
-                                          ] : null,
+                    'category'          => $blog?->category ? [
+                                                'id'            => $blog->category->id,
+                                                'category_name' => $blog->category->category_name,
+                                                'slug'          => $blog->category->slug,
+                                            ] : null,
                     'title'             => $blog->title,
                     'slug'              => $blog->slug,
                     'short_description' => $blog->short_description,
@@ -32,7 +28,6 @@ class BlogCollection extends ResourceCollection
                     'meta_keywords'     => $blog->meta_keywords,
                     'status'            => $blog->status,
                     'created_at'        => optional($blog->created_at)->toDateTimeString(),
-                    'updated_at'        => optional($blog->updated_at)->toDateTimeString(),
                 ];
             })
         ];

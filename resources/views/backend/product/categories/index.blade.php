@@ -97,6 +97,7 @@
                     <th data-breakpoints="lg">{{translate('Status')}}</th>
                     <th data-breakpoints="lg">Best Seller</th>
                     <th data-breakpoints="lg">{{translate('Save Big')}}</th>
+                    <th data-breakpoints="lg">{{translate('Top Pick')}}</th>
                     <th data-breakpoints="lg">{{translate('Commission')}}</th>
                     <th width="10%" class="text-right">{{translate('Options')}}</th>
                 </tr>
@@ -187,6 +188,13 @@
                             <span></span>
                         </label>
                     </td>
+                    <td>
+                        <label class="aiz-switch aiz-switch-success mb-0">
+                            <input type="checkbox" onchange="update_top_pick(this)" value="{{ $category->id }}" <?php
+                                if($category->is_top_pick == 1) echo "checked";?>>
+                            <span></span>
+                        </label>
+                    </td>
                     <td>{{ $category->commision_rate }} %</td>
                     <td class="text-right">
                         @can('edit_product_category')
@@ -268,6 +276,30 @@
                 success: function(data) {
                     if (data.success) {
                         AIZ.plugins.notify('success', '{{ translate('Save Big updated successfully') }}');
+                    } else {
+                        el.checked = !el.checked; // revert toggle
+                        AIZ.plugins.notify('danger', data.message || '{{ translate('Something went wrong') }}');
+                    }
+                },
+                error: function(xhr) {
+                    el.checked = !el.checked; // revert toggle
+                    var msg = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : '{{ translate('Something went wrong') }}';
+                    AIZ.plugins.notify('danger', msg);
+                }
+            });
+        }
+
+        function update_top_pick(el){
+            var status = el.checked ? 1 : 0;
+            $.ajax({
+                url: '{{ route('categories.top_pick') }}',
+                method: 'POST',
+                data: { _token: '{{ csrf_token() }}', id: el.value, status: status },
+                success: function(data) {
+                    if (data.success) {
+                        AIZ.plugins.notify('success', '{{ translate('Top pick updated successfully') }}');
                     } else {
                         el.checked = !el.checked; // revert toggle
                         AIZ.plugins.notify('danger', data.message || '{{ translate('Something went wrong') }}');

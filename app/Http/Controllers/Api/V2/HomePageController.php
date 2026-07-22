@@ -26,105 +26,136 @@ class HomePageController extends Controller
 {
     public function homePage(Request $request)
     {
-        Log::info(auth()->user());
-
         $partnersList = $this->partnersList($request);
         $blogs = $this->blogs();
         $reviews = $this->clientReviews();
-        $categories = $this->categories_data(); // plain array
-        $bannersData = $this->getBannersData();  // plain array
+        $categories = $this->categories_data();
+        $bannersData = $this->getBannersData();
 
-        $trending_products = Product::where('is_trending', 1)
-            ->with([
-                'stocks' => fn($q) => $q->orderBy('price'),
-                'taxes',
-                'main_category:id,color,lite_color',
-            ])
-            ->latest()->limit(15)->get();
+        $topPickCategories = Cache::remember('home-top-pick-categories', now()->addMinutes(30), function () {
+            return Category::with(['parent.parent'])
+                ->where('is_top_pick', 1)
+                ->select([
+                    'id',
+                    'name',
+                    'slug',
+                    'parent_id',
+                    'banner',
+                    'icon',
+                    'cover_image',
+                    'color',
+                    'lite_color',
+                    'tagline',
+                    'meta_title',
+                    'meta_description',
+                    'banner_alt',
+                    'icon_alt',
+                    'cover_image_alt'
+                ])
+                ->latest()
+                ->limit(9)
+                ->get()
+                ->map(fn(Category $cat) => [
+                    'id'               => $cat->id,
+                    'name'             => $cat->name,
+                    'slug'             => $cat->full_slug,
+                    'banner'           => uploaded_asset($cat->banner),
+                    'icon'             => uploaded_asset($cat->icon),
+                    'cover_image'      => uploaded_asset($cat->cover_image),
+                    'color'            => $cat->color ?? '',
+                    'lite_color'       => $cat->lite_color ?? '',
+                    'tagline'          => $cat->tagline ?? '',
+                    'meta_title'       => $cat->meta_title,
+                    'meta_description' => $cat->meta_description,
+                    'banner_alt'       => $cat->banner_alt,
+                    'icon_alt'         => $cat->icon_alt,
+                    'cover_image_alt'  => $cat->cover_image_alt,
+                ]);
+        });
 
-        $best_seller_products = Product::where('best_seller', 1)
-            ->latest()
-            ->limit(9)
-            ->get();
+        $trendingProducts = Cache::remember('home-trending-products', now()->addMinutes(30), function () {
+            return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
+                ->where('is_trending', 1)
+                ->select([
+                    'id',
+                    'name',
+                    'thumbnail_img',
+                    'slug',
+                    'unit_price',
+                    'discount_start_date',
+                    'discount_end_date',
+                    'discount_type',
+                    'discount',
+                    'rating',
+                    'product_code',
+                    'pip_code',
+                    'todays_deal',
+                    'featured',
+                ])
+                ->latest()
+                ->limit(9)
+                ->get();
+        });
 
-        // $monthly_deal_products = Product::where('monthly_deal', 1)
-        //                             ->with(['stocks' => fn($q) => $q->orderBy('price'), 'taxes'])
-        //                             ->latest()->limit(10)->get();
+        $bestSellerProducts = Cache::remember('home-best-seller-products', now()->addMinutes(30), function () {
+            return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
+                ->where('best_seller', 1)
+                ->select([
+                    'id',
+                    'name',
+                    'thumbnail_img',
+                    'slug',
+                    'unit_price',
+                    'discount_start_date',
+                    'discount_end_date',
+                    'discount_type',
+                    'discount',
+                    'rating',
+                    'product_code',
+                    'pip_code',
+                    'todays_deal',
+                    'featured',
+                ])
+                ->latest()
+                ->limit(9)
+                ->get();
+        });
 
-        $save_big_categories = Category::where('save_big', 1)
-            ->with(['parent.parent']) // load up to 2 levels up for full_slug
-            ->select([
-                'id',
-                'name',
-                'slug',
-                'parent_id',
-                'banner',
-                'icon',
-                'cover_image',
-                'color',
-                'lite_color',
-                'tagline',
-                'meta_title',
-                'meta_description',
-                'banner_alt',
-                'icon_alt',
-                'cover_image_alt'
-            ])
-            ->latest()
-            ->limit(3)
-            ->get()
-            ->map(fn(Category $cat) => [
-                'id'               => $cat->id,
-                'name'             => $cat->name,
-                'slug'             => $cat->full_slug, // parent/child/subchild
-                'banner'           => uploaded_asset($cat->banner),
-                'icon'             => uploaded_asset($cat->icon),
-                'cover_image'      => uploaded_asset($cat->cover_image),
-                'color'            => $cat->color ?? '',
-                'lite_color'       => $cat->lite_color ?? '',
-                'tagline'          => $cat->tagline ?? '',
-                'meta_title'       => $cat->meta_title,
-                'meta_description' => $cat->meta_description,
-                'banner_alt'       => $cat->banner_alt,
-                'icon_alt'         => $cat->icon_alt,
-                'cover_image_alt'  => $cat->cover_image_alt,
-            ]);
-
-        $top_pick_products = Product::with(['stocks', 'taxes'])
-            ->where('save_big', 1)
-            ->select([
-                'id',
-                'name',
-                'thumbnail_img',
-                'slug',
-                'unit_price',
-                'discount_start_date',
-                'discount_end_date',
-                'discount_type',
-                'discount',
-                'rating',
-                'product_code',
-                'pip_code',
-                'todays_deal',
-                'featured',
-                'monthly_deal',
-            ])
-            ->latest()
-            ->limit(9)
-            ->get();
+        $topPickProducts = Cache::remember('home-top-pick-products', now()->addMinutes(30), function () {
+            return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
+                ->where('is_top_pick', 1)
+                ->select([
+                    'id',
+                    'name',
+                    'thumbnail_img',
+                    'slug',
+                    'unit_price',
+                    'discount_start_date',
+                    'discount_end_date',
+                    'discount_type',
+                    'discount',
+                    'rating',
+                    'product_code',
+                    'pip_code',
+                    'todays_deal',
+                    'featured',
+                ])
+                ->latest()
+                ->limit(9)
+                ->get();
+        });
 
         return response()->json([
             'success' => true,
-            'data'    => array_merge($categories, [
-                'partners'              => $partnersList,
-                'blogs'                 => $blogs,
-                'reviews'               => $reviews,
-                'trending_products'     => new ProductSingleCollection($trending_products),
-                // 'monthly_deal_products' => new ProductSingleCollection($monthly_deal_products),
-                'top_picks_categories'   => $save_big_categories, // already mapped with full_slug
-                'top_pick_products' => new ProductSingleCollection($top_pick_products),
-                'banners'               => $bannersData,
-                'best_seller_products' => new ProductSingleCollection($best_seller_products),
+            'data' => array_merge($categories, [
+                'partners' => $partnersList,
+                'blogs' => $blogs,
+                'reviews' => $reviews,
+                'trending_products' => new ProductSingleCollection($trendingProducts),
+                'top_picks_categories' => $topPickCategories,
+                'top_pick_products' => new ProductSingleCollection($topPickProducts),
+                'banners' => $bannersData,
+                'best_seller_products' => new ProductSingleCollection($bestSellerProducts),
             ]),
         ]);
     }
@@ -185,7 +216,24 @@ class HomePageController extends Controller
 
     public function blogs()
     {
-        $blogs = Blog::with('category')->paginate(10);
+        $blogs = Blog::with('category:id,category_name,slug')
+            ->select([
+                'id',
+                'category_id',
+                'title',
+                'slug',
+                'short_description',
+                'description',
+                'banner',
+                'meta_title',
+                'meta_img',
+                'meta_description',
+                'meta_keywords',
+                'status',
+                'created_at',
+            ])
+            ->get();
+
         return new BlogCollection($blogs);
     }
 

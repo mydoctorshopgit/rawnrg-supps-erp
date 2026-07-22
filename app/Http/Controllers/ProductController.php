@@ -881,4 +881,16 @@ class ProductController extends Controller
 
         return response()->json(['error' => 'No file uploaded'], 400);
     }
+
+    public function updateTopPick(Request $request)
+    {
+        $product = Product::findOrFail($request->id);
+        $product->is_top_pick = $request->status;
+        if ($product->save()) {
+            Artisan::call('view:clear');
+            Artisan::call('cache:clear');
+            return response()->json(1);
+        }
+        return response()->json(0);
+    }
 }

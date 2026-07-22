@@ -62,7 +62,7 @@ class ProductSingleCollection extends ResourceCollection
                     // Feature flags
                     'is_top_rated'   => (bool) $data->todays_deal,
                     'is_featured'    => (bool) $data->featured,
-                    'is_monthly_deal'=> (bool) $data->monthly_deal,
+                    // 'is_monthly_deal'=> (bool) $data->monthly_deal,
                     'is_best_seller' => (bool) $data->best_seller,
                     'is_trending'    => (bool) $data->is_trending,
                     'is_save_big'    => (bool) $data->save_big,

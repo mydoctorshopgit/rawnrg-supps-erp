@@ -407,6 +407,13 @@
                                     </a>
                                 </li>
                             @endcan
+                            @can('topPickBannar.index')
+                                <li class="aiz-side-nav-item">
+                                    <a class="aiz-side-nav-link" href="{{ route('topPickBannar.index') }}">
+                                        <span class="aiz-side-nav-text">Top Pick Bannars</span>
+                                    </a>
+                                </li>
+                            @endcan
                             {{-- @can('monthlyBannar.index')
                                 <li class="aiz-side-nav-item">
                                     <a class="aiz-side-nav-link" href="{{route('monthlyBannar.index')}}">

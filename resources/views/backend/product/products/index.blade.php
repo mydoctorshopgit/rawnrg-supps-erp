@@ -150,6 +150,7 @@
                         <th data-breakpoints="lg">{{translate('Featured')}}</th>
                         <th data-breakpoints="lg">{{translate('Trending')}}</th>
                         <th data-breakpoints="lg">{{translate('Monthly Deal')}}</th>
+                        <th data-breakpoints="lg">{{translate('Top Pick')}}</th>
                         <!-- <th data-breakpoints="lg">{{translate('pharma')}}</th> -->
                         <th data-breakpoints="lg">Best seller</th>
                         <!-- <th data-breakpoints="lg">{{translate('Save Big')}}</th> -->
@@ -260,6 +261,13 @@
                             <label class="aiz-switch aiz-switch-success mb-0">
                                 <input class="js-monthly-deal-toggle" value="{{ $product->id }}" type="checkbox"
                                     {{ $product->monthly_deal == 1 ? 'checked' : '' }}>
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
+                        <td>
+                            <label class="aiz-switch aiz-switch-success mb-0">
+                                <input class="js-top-pick-toggle" value="{{ $product->id }}" type="checkbox"
+                                    {{ $product->is_top_pick == 1 ? 'checked' : '' }}>
                                 <span class="slider round"></span>
                             </label>
                         </td>
@@ -555,6 +563,22 @@
             }, function (data) {
                 if (data == 1) {
                     AIZ.plugins.notify('success', '{{ translate('Monthly Deals products updated successfully') }}');
+                } else {
+                    AIZ.plugins.notify('danger', '{{ translate('Something went wrong') }}');
+                }
+            });
+        });
+
+        $(document).on('change', '.js-top-pick-toggle', function () {
+            var status = this.checked ? 1 : 0;
+            var el = this;
+            $.post('{{ route('products.update_top_pick') }}', {
+                _token: '{{ csrf_token() }}',
+                id: el.value,
+                status: status
+            }, function (data) {
+                if (data == 1) {
+                    AIZ.plugins.notify('success', '{{ translate('Top pick products updated successfully') }}');
                 } else {
                     AIZ.plugins.notify('danger', '{{ translate('Something went wrong') }}');
                 }

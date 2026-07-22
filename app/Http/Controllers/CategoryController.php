@@ -469,4 +469,12 @@ class CategoryController extends Controller
             'url' => asset('public/uploads/editor/' . $filename)
         ]);
     }
+
+    public function updateTopPick(Request $request)
+    {
+        $category = Category::findOrFail($request->id);
+        $category->is_top_pick = $request->status;
+        $category->save();
+        return response()->json(['success' => true]);
+    }
 }
