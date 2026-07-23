@@ -310,7 +310,7 @@ class HomePageController extends Controller
      */
     public function getBannersData(): array
     {
-        $grouped = Cache::remember('all_banners', 300, function () {
+        $grouped = Cache::remember('all_banners', now()->addMinutes(30), function () {
             return Bannars::whereIn('status', [1, 2, 5, 6])
                 ->latest()
                 ->get()
