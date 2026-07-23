@@ -347,31 +347,30 @@ class HomePageController extends Controller
     // Private helpers
     // -------------------------------------------------------------------------
 
-    private function formatBanner(Bannars $b): array
+    private function formatBanner(Bannars $banner): array
     {
-        $base = [
-            'id'          => $b->id,
-            'banner_type' => $b->banner_type ?? 'simple',
-            'image'       => uploaded_asset($b->image),
-            'background_image' => uploaded_asset($b->background_image),
-            'url'         => $b->url,
-            'created_at'  => $b->created_at?->toDateTimeString(),
+        $data = [
+            'id'          => $banner->id,
+            // 'banner_type' => $b->banner_type ?? 'simple',
+            'image'       => uploaded_asset($banner->image),
+            'background_image' => uploaded_asset($banner->background_image),
+            'url'         => $banner->url,
+            'created_at'  => $banner->created_at?->toDateTimeString(),
         ];
 
-        if (($b->banner_type ?? 'simple') === 'product') {
-            return array_merge($base, [
-                'sku'           => $b->sku,
-                'product_title' => $b->product_title,
-                'price'         => (float) $b->price,
-                'vat'           => (float) $b->vat,
-                'button_text'   => $b->button_text,
-            ]);
-        }
+        // if (($b->banner_type ?? 'simple') === 'product') {
+        //     return array_merge($base, [
+        //         'sku'           => $b->sku,
+        //         'product_title' => $b->product_title,
+        //         'price'         => (float) $b->price,
+        //         'vat'           => (float) $b->vat,
+        //         'button_text'   => $b->button_text,
+        //     ]);
+        // }
 
-        // simple banner
-        return array_merge($base, [
-            'title'       => $b->title,
-            'description' => $b->description,
+        return array_merge($data, [
+            'title'       => $banner->title,
+            'description' => $banner->description,
         ]);
     }
 }
