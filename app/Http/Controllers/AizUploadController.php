@@ -8,6 +8,7 @@ use Response;
 use Auth;
 use Storage;
 use enshrined\svgSanitize\Sanitizer;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 
@@ -107,6 +108,7 @@ class AizUploadController extends Controller
                 }
 
                 $path = $file->store('uploads/all', 'local');
+                Log::info("Aiz Store Path: ".$path);
                 $size = $file->getSize();
 
                 // 4. Image Processing (Multiple Sizes)
