@@ -26,28 +26,14 @@ class HomePageController extends Controller
 {
     public function homePage(Request $request)
     {
-        // $partnersList = $this->partnersList($request);
-        // $blogs = $this->blogs();
+        $partnersList = $this->partnersList($request);
+        $blogs = $this->blogs();
         $reviews = $this->clientReviews();
         $categories = $this->categories_data();
         $bannersData = $this->getBannersData();
 
-        $data = Cache::remember('homepage', now()->addMinutes(30), function () {
-            $partners = Brand::select([
-                'id',
-                'name',
-                'logo',
-            ])
-                ->get()
-                ->map(function ($brand) {
-                    return [
-                        'id' => $brand->id,
-                        'name' => $brand->name,
-                        'logo' => uploaded_asset($brand->logo),
-                    ];
-                });
-
-            $topPickCategories = Category::with(['parent.parent'])
+        $topPickCategories = Cache::remember('home-top-pick-categories', now()->addMinutes(30), function () {
+            return Category::with(['parent.parent'])
                 ->where('is_top_pick', 1)
                 ->select([
                     'id',
@@ -85,8 +71,10 @@ class HomePageController extends Controller
                     'icon_alt'         => $cat->icon_alt,
                     'cover_image_alt'  => $cat->cover_image_alt,
                 ]);
+        });
 
-            $trendingProducts = Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
+        $trendingProducts = Cache::remember('home-trending-products', now()->addMinutes(30), function () {
+            return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
                 ->where('is_trending', 1)
                 ->select([
                     'id',
@@ -108,9 +96,10 @@ class HomePageController extends Controller
                 ->latest()
                 ->limit(9)
                 ->get();
+        });
 
-
-            $bestSellerProducts = Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
+        $bestSellerProducts = Cache::remember('home-best-seller-products', now()->addMinutes(30), function () {
+            return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
                 ->where('best_seller', 1)
                 ->select([
                     'id',
@@ -132,8 +121,10 @@ class HomePageController extends Controller
                 ->latest()
                 ->limit(9)
                 ->get();
+        });
 
-            $topPickProducts = Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
+        $topPickProducts = Cache::remember('home-top-pick-products', now()->addMinutes(30), function () {
+            return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
                 ->where('is_top_pick', 1)
                 ->select([
                     'id',
@@ -155,28 +146,19 @@ class HomePageController extends Controller
                 ->latest()
                 ->limit(9)
                 ->get();
-
-            return [
-                'partners' => $partners,
-                'topPickCategories' => $topPickCategories,
-                'trendingProducts' => $trendingProducts,
-                'bestSellerProducts' => $bestSellerProducts,
-                'topPickProducts' => $topPickProducts,
-                'blogs' => $this->blogs(),
-            ];
         });
 
         return response()->json([
             'success' => true,
             'data' => array_merge($categories, [
-                'partners' => $data['partners'],
-                'blogs' => $data['blogs'],
+                'partners' => $partnersList,
+                'blogs' => $blogs,
                 'reviews' => $reviews,
-                'trending_products' => new ProductSingleCollection($data['trendingProducts']),
-                'top_picks_categories' => $data['topPickCategories'],
-                'top_pick_products' => new ProductSingleCollection($data['topPickProducts']),
+                'trending_products' => new ProductSingleCollection($trendingProducts),
+                'top_picks_categories' => $topPickCategories,
+                'top_pick_products' => new ProductSingleCollection($topPickProducts),
                 'banners' => $bannersData,
-                'best_seller_products' => new ProductSingleCollection($data['bestSellerProducts']),
+                'best_seller_products' => new ProductSingleCollection($bestSellerProducts),
             ]),
         ]);
     }
