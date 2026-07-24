@@ -67,6 +67,13 @@
         </div>
     </div>
     <div class="form-group row">
+        <label class="col-sm-3 col-from-label">Badge Text</label>
+        <div class="col-sm-9">
+            <input type="text" name="badge_text" class="form-control"
+                   placeholder="Badge text" value="{{ $bannars->badge_text ?? '' }}">
+        </div>
+    </div>
+    <div class="form-group row">
         <label class="col-sm-3 col-from-label">Description</label>
         <div class="col-sm-9">
             <textarea name="description" rows="4" class="form-control"

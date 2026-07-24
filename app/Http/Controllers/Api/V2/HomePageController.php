@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\V2\BestSellerCategoryCollection;
 use Illuminate\Http\Request;
-use App\Http\Resources\V2\ParntersCollection;
 use App\Http\Resources\V2\BlogCollection;
 use App\Http\Resources\V2\CategoryResource;
 use App\Http\Resources\V2\ProductSingleCollection;
 use App\Models\Bannars;
-use App\Models\Partner;
 use App\Models\BlogCategory;
 use App\Models\Blog;
 use App\Models\Category;
@@ -18,9 +15,9 @@ use App\Models\ClientReview;
 use App\Models\Brand;
 use App\Http\Resources\V2\BrandCollection;
 use App\Http\Resources\V2\ClientReviewCollection;
+use App\Http\Resources\V2\TopPickCategoryResource;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
-use Log;
 
 class HomePageController extends Controller
 {
@@ -31,47 +28,6 @@ class HomePageController extends Controller
         $reviews = $this->clientReviews();
         $categories = $this->categories_data();
         $bannersData = $this->getBannersData();
-
-        $topPickCategories = Cache::remember('home-top-pick-categories', now()->addMinutes(30), function () {
-            return Category::with(['parent.parent'])
-                ->where('is_top_pick', 1)
-                ->select([
-                    'id',
-                    'name',
-                    'slug',
-                    'parent_id',
-                    'banner',
-                    'icon',
-                    'cover_image',
-                    'color',
-                    'lite_color',
-                    'tagline',
-                    'meta_title',
-                    'meta_description',
-                    'banner_alt',
-                    'icon_alt',
-                    'cover_image_alt'
-                ])
-                ->latest()
-                ->limit(9)
-                ->get()
-                ->map(fn(Category $cat) => [
-                    'id'               => $cat->id,
-                    'name'             => $cat->name,
-                    'slug'             => $cat->full_slug,
-                    'banner'           => uploaded_asset($cat->banner),
-                    'icon'             => uploaded_asset($cat->icon),
-                    'cover_image'      => uploaded_asset($cat->cover_image),
-                    'color'            => $cat->color ?? '',
-                    'lite_color'       => $cat->lite_color ?? '',
-                    'tagline'          => $cat->tagline ?? '',
-                    'meta_title'       => $cat->meta_title,
-                    'meta_description' => $cat->meta_description,
-                    'banner_alt'       => $cat->banner_alt,
-                    'icon_alt'         => $cat->icon_alt,
-                    'cover_image_alt'  => $cat->cover_image_alt,
-                ]);
-        });
 
         $trendingProducts = Cache::remember('home-trending-products', now()->addMinutes(30), function () {
             return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
@@ -123,31 +79,6 @@ class HomePageController extends Controller
                 ->get();
         });
 
-        $topPickProducts = Cache::remember('home-top-pick-products', now()->addMinutes(30), function () {
-            return Product::with(['stocks', 'taxes', 'main_category:id,color,lite_color'])
-                ->where('is_top_pick', 1)
-                ->select([
-                    'id',
-                    'name',
-                    'thumbnail_img',
-                    'slug',
-                    'unit_price',
-                    'discount_start_date',
-                    'discount_end_date',
-                    'discount_type',
-                    'discount',
-                    'rating',
-                    'product_code',
-                    'pip_code',
-                    'todays_deal',
-                    'featured',
-                    'category_id'
-                ])
-                ->latest()
-                ->limit(9)
-                ->get();
-        });
-
         return response()->json([
             'success' => true,
             'data' => array_merge($categories, [
@@ -155,8 +86,6 @@ class HomePageController extends Controller
                 'blogs' => $blogs,
                 'reviews' => $reviews,
                 'trending_products' => new ProductSingleCollection($trendingProducts),
-                'top_picks_categories' => $topPickCategories,
-                'top_pick_products' => new ProductSingleCollection($topPickProducts),
                 'banners' => $bannersData,
                 'best_seller_products' => new ProductSingleCollection($bestSellerProducts),
             ]),
@@ -265,7 +194,7 @@ class HomePageController extends Controller
                     'children.children:id,name,slug,parent_id,color,lite_color,tagline',
                     'children.children.children:id,name,slug,parent_id,color,lite_color,tagline',
                 ])
-                ->select(
+                ->select([
                     'id',
                     'name',
                     'slug',
@@ -281,29 +210,35 @@ class HomePageController extends Controller
                     'banner_alt',
                     'icon_alt',
                     'cover_image_alt'
-                )
+                ])
                 ->get();
 
-            // $featured = Category::active()
-            //     ->where('featured', 1)
-            //     ->select('id', 'name', 'slug', 'cover_image', 'meta_title', 'meta_description', 'banner', 'icon',
-            //              'color', 'lite_color', 'tagline', 'banner_alt', 'icon_alt', 'cover_image_alt')
-            //     ->with('coverImage')
-            //     ->limit(8)
-            //     ->get();
+            $topPickCategories = Category::with('topPickProducts')
+                ->where('is_top_pick', 1)
+                ->active()
+                ->select([
+                    'id',
+                    'name',
+                    'slug',
+                    'parent_id',
+                    'banner',
+                    'icon',
+                    'color',
+                    'lite_color',
+                    'tagline',
+                    'cover_image',
+                    'meta_title',
+                    'meta_description',
+                    'banner_alt',
+                    'icon_alt',
+                    'cover_image_alt'
+                ])
+                ->limit(9)
+                ->get();
 
-            // $bestSellerCategories = Category::active()
-            //     ->where('best_seller', 1)
-            //     ->with(['bestSellerProducts'])
-            //     ->select('id', 'name', 'slug', 'banner', 'icon', 'cover_image', 'color', 'lite_color', 'tagline')
-            //     ->limit(10)
-            //     ->get();
-
-            // Return a plain array — never a Response object inside cache
             return [
-                'menu_categories'        => CategoryResource::collection($menu),
-                // 'featured_categories'    => CategoryResource::collection($featured),
-                // 'best_seller_categories' => BestSellerCategoryCollection::collection($bestSellerCategories),
+                'menu_categories' => CategoryResource::collection($menu),
+                'topPickCategories' => TopPickCategoryResource::collection($topPickCategories),
             ];
         });
     }
@@ -372,7 +307,8 @@ class HomePageController extends Controller
         // }
 
         return array_merge($data, [
-            'title'       => $banner->title,
+            'title' => $banner->title,
+            'badge_text' => $banner->badge_text,
             'description' => $banner->description,
         ]);
     }

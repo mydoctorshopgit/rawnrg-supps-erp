@@ -10,6 +10,7 @@ class Bannars extends Model
 
     protected $fillable = [
         'title',
+        'badge_text',
         'description',
         'image',
         'backgound_image',

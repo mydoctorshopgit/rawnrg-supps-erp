@@ -253,7 +253,8 @@ class BannerController extends Controller
             $bannars->title       = null;
             $bannars->description = null;
         } else {
-            $bannars->title       = $request->title;
+            $bannars->title = $request->title;
+            $bannars->badge_text = $request->badge_text;
             $bannars->description = $request->description;
             // clear product-banner fields
             $bannars->sku           = null;

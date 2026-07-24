@@ -112,34 +112,40 @@ class Category extends Model
 
 
     public function children()
-{
-    return $this->hasMany(Category::class, 'parent_id')
-        ->where('status', 1)
-        ->orderBy('order_level', 'desc')
-        ->orderBy('name', 'asc');
-}
+    {
+        return $this->hasMany(Category::class, 'parent_id')
+            ->where('status', 1)
+            ->orderBy('order_level', 'desc')
+            ->orderBy('name', 'asc');
+    }
 
-public function childrenRecursive()
-{
-    return $this->children()->with('childrenRecursive');
-}
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
+    }
 
-public function bestSellerProducts()
-{
-    return $this->belongsToMany(
+    public function bestSellerProducts()
+    {
+        return $this->belongsToMany(
             Product::class,
             'product_categories',
             'category_id',
             'product_id'
         )
-        ->where('products.best_seller', 1)
-        ->with([
-            'stocks' => function ($q) {
-                $q->orderBy('price', 'asc');
-            },
-            'taxes'
-        ])
-        ->select('products.*')
-        ->orderBy('products.created_at', 'desc');
-}
+            ->where('products.best_seller', 1)
+            ->with([
+                'stocks' => function ($q) {
+                    $q->orderBy('price', 'asc');
+                },
+                'taxes'
+            ])
+            ->select('products.*')
+            ->orderBy('products.created_at', 'desc');
+    }
+
+    public function topPickProducts()
+    {
+        return $this->belongsToMany(Product::class, 'product_categories', 'category_id', 'product_id')
+            ->where('products.is_top_pick', 1);
+    }
 }
